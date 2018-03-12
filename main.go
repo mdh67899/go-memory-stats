@@ -96,7 +96,6 @@ func GetMemStats() []MetricValue {
 }
 
 func send2falcon(items []MetricValue) {
-
 	if len(items) == 0 {
 		log.Println("no items given")
 		return
@@ -104,7 +103,7 @@ func send2falcon(items []MetricValue) {
 
 	content, err := json.Marshal(items)
 	if err != nil {
-		log.Println("json Marshal faild:", items)
+		log.Println("json Marshal faild:", err, "data:", items)
 		return
 	}
 
@@ -113,8 +112,8 @@ func send2falcon(items []MetricValue) {
 	client := http.Client{
 		Timeout: time.Second * 3,
 	}
+	
 	resp, err := client.Post(Falcon_url, "application/json", data)
-
 	if err != nil {
 		log.Println("post data", items, "to falcon url", Falcon_url, "failed...")
 		return
@@ -139,14 +138,11 @@ func process_signal(pid int) {
 	ticker := time.NewTicker(Interval)
 
 	for {
-
 		select {
-
 		case s := <-sigs:
 			log.Println("recv", s)
 
 			switch s {
-
 			case syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT:
 				log.Println("gracefull shut down")
 				log.Println(pid, "exit")
